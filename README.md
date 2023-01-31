@@ -2,7 +2,7 @@
 
 ## Problem Statement
 
-\*\* Try to improve Recall metric in a highly imbalanced dataset, for instance given a credit card fraudulent data\*\*
+#### Try to improve Recall metric in a highly imbalanced dataset, for instance given a credit card fraudulent data
 
 ## Scenario
 
@@ -22,89 +22,177 @@ It contains only numerical input variables which are the result of a PCA transfo
 -   Balancing the dataset and use accuracy will solve the issue of data imbalanced but it won’t solve cost of error difference.
 -   Both Precision and Recall measure wrt positive points, And F1 score is the harmonic mean of Precision and Recall. These metrices can resolve cost of error problem.
 
-## Dataset: Analysis
+## Data Analysis : EDA and FE
 
 -   There are no missing values in the dataset
 -   No need to analyse on outliers since outliers datapoints can be fraudulent
+-   Correlation graph
 
-\`\`\`
 
-df.info()
 
-\<class 'pandas.core.frame.DataFrame'\>
 
-RangeIndex: 284807 entries, 0 to 284806
 
-Data columns (total 31 columns):
+![image](https://user-images.githubusercontent.com/106816732/215701052-d6278d2c-1494-4d24-8d1e-6f5e9cb2fe1b.png)
 
-\# Column Non-Null Count Dtype
+- Removed Time feature and scaled the dataset using StandardScalar() before training
 
-\--- ------ -------------- -----
+## Model training and testing results
 
-0 Time 284807 non-null float64
+#### Note : Since there is no noteworthy difference in the F1 scores on training data and testing data, we can confirm that there is no overfitting issue with any model.
 
-1 V1 284807 non-null float64
+Nearest Neighbors
+Model Performance of training set
+- F1 Score : 0.9995
+- Precision : 0.9495
+- Recall : 0.7966
 
-2 V2 284807 non-null float64
+Model Performance of test set
+- F1 Score : 0.9996
+- Precision : 0.9244
+- Recall : 0.7971
+===================================
 
-3 V3 284807 non-null float64
 
-4 V4 284807 non-null float64
+Linear SVM
+Model Performance of training set
+- F1 Score : 0.9993
+- Precision : 0.8389
+- Recall : 0.7797
 
-5 V5 284807 non-null float64
+Model Performance of test set
+- F1 Score : 0.9995
+- Precision : 0.8603
+- Recall : 0.8478
+===================================
 
-6 V6 284807 non-null float64
 
-7 V7 284807 non-null float64
+RBF SVM
+Model Performance of training set
+- F1 Score : 0.9996
+- Precision : 0.9703
+- Recall : 0.8305
 
-8 V8 284807 non-null float64
+Model Performance of test set
+- F1 Score : 0.9994
+- Precision : 0.9794
+- Recall : 0.6884
+===================================
 
-9 V9 284807 non-null float64
 
-10 V10 284807 non-null float64
+Decision Tree
+Model Performance of training set
+- F1 Score : 1.0000
+- Precision : 1.0000
+- Recall : 1.0000
 
-11 V11 284807 non-null float64
+Model Performance of test set
+- F1 Score : 0.9992
+- Precision : 0.7365
+- Recall : 0.7899
+===================================
 
-12 V12 284807 non-null float64
 
-13 V13 284807 non-null float64
+Random Forest
+Model Performance of training set
+- F1 Score : 1.0000
+- Precision : 1.0000
+- Recall : 1.0000
 
-14 V14 284807 non-null float64
+Model Performance of test set
+- F1 Score : 0.9996
+- Precision : 0.9652
+- Recall : 0.8043
+===================================
 
-15 V15 284807 non-null float64
 
-16 V16 284807 non-null float64
+Neural Net
+Model Performance of training set
+- F1 Score : 0.9998
+- Precision : 0.9734
+- Recall : 0.9294
 
-17 V17 284807 non-null float64
+Model Performance of test set
+- F1 Score : 0.9996
+- Precision : 0.9180
+- Recall : 0.8116
+===================================
 
-18 V18 284807 non-null float64
 
-19 V19 284807 non-null float64
+AdaBoost
+Model Performance of training set
+- F1 Score : 0.9991
+- Precision : 0.8369
+- Recall : 0.6667
 
-20 V20 284807 non-null float64
+Model Performance of test set
+- F1 Score : 0.9992
+- Precision : 0.8246
+- Recall : 0.6812
+===================================
 
-21 V21 284807 non-null float64
 
-22 V22 284807 non-null float64
+Naive Bayes
+Model Performance of training set
+- F1 Score : 0.9870
+- Precision : 0.0612
+- Recall : 0.8164
 
-23 V23 284807 non-null float64
+Model Performance of test set
+- F1 Score : 0.9874
+- Precision : 0.0600
+- Recall : 0.8623
+===================================
 
-24 V24 284807 non-null float64
+![image](https://user-images.githubusercontent.com/106816732/215709908-80c8903a-ec39-48bd-b723-ad7ec36e38c5.png)
 
-25 V25 284807 non-null float64
+## Lets try to increase Recall value by customizing softmax threshold and setting class weights
+```
+# Initialising the ANN
+classifier = Sequential()
+initializer = tf.keras.initializers.GlorotNormal()
+class_weight = {0: 1.,
+                1: 3.}
 
-26 V26 284807 non-null float64
+# Adding the input layer and the first hidden layer
+classifier.add(Dense(units =15 , kernel_initializer = initializer, activation = 'elu', input_dim = 29))
 
-27 V27 284807 non-null float64
+# Adding the second hidden layer
+classifier.add(Dense(units = 15, kernel_initializer = initializer, activation = 'elu'))
 
-28 V28 284807 non-null float64
+# Adding the output layer
+classifier.add(Dense(units = 1, kernel_initializer = initializer, activation = 'sigmoid'))
 
-29 Amount 284807 non-null float64
+# Compiling the ANN
+classifier.compile(optimizer = 'adam', loss = 'binary_crossentropy', metrics = ['accuracy'])
 
-30 Class 284807 non-null int64
+# Fitting the ANN to the Training set
+classifier.fit(X_train_scaled, y_train, batch_size = 32, epochs = 100, class_weight=class_weight)
 
-dtypes: float64(30), int64(1)
+# Predicting the Test set results
+y_pred = classifier.predict(X_test_scaled)
 
-memory usage: 67.4 MB
+# redefining the softmax threshold
+for i, predicted in enumerate(y_pred):
+    if predicted[0] > 0.2:
+        y_pred[i]=1
+    else:
+        y_pred[i]=0
+```
+##### Performance after softmax threshold modification and class balancing
+Model Performance of test set after giving class weights and change in softmax threshold
+- F1 Score : 0.9992
+- Precision : 0.6946
+- Recall : 0.8406
 
-\`\`\`
+![image](https://user-images.githubusercontent.com/106816732/215710999-33b42d27-3914-4e78-bba2-9879e20c2927.png)
+
+## Conclusion
+We could see a slight increase in Recall value by making some simple changes in class balancing and redefining the softmax threshold
+
+## Improvements
+- We can design a custom error metric like, a|type1 errors| + b|type2 errors|, a>>b.
+Here we give different weights to errors. Type 1 error is false positives and type 2 is FN. This custom method will solve data imabalacing using weights and cost of error problem
+- The performances may be improved by
+  * Hyperparameter tuning
+  * Redefining the architecture of ANN
+  * Adding Dropouts and Batch normalization
